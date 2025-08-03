@@ -75,3 +75,24 @@ echo "$PATH" | tr ':' '\n' | grep -v '^$' | wc -l
 . ./3-paths
 # Output: e.g., 11
 ```
+
+## Task 4: Global variables
+
+**Script Name:** `4-global_variables`
+
+**Description:**
+Lists all global (environment) variables currently available in the shell session using `printenv`.
+
+**Command Used:**
+
+```bash
+printenv
+```
+
+**Example usage**
+
+```bash
+source ./4-global_variables
+# Output: list of environment variables
+
+```
