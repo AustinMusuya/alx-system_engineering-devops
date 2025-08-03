@@ -22,3 +22,20 @@ ls  # This will now run `rm *` instead of listing files
 Prints a greeting to the current Linux user using the `$USER` environment variable.
 
 **Example Output:**
+
+```bash
+hello julien
+```
+
+## Task 2: The path to success is to take massive, determined action
+
+**Script Name:** `2-path`
+
+**Description:**
+Appends `/action` to the system `PATH` environment variable, so it becomes the last directory checked when looking for executables.
+
+**Command Used:**
+
+```bash
+export PATH="$PATH:/action"
+```
