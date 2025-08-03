@@ -94,5 +94,24 @@ printenv
 ```bash
 source ./4-global_variables
 # Output: list of environment variables
+```
 
+## Task 5: Local variables
+
+**Script Name:** `5-local_variables`
+
+**Description:**
+Displays all local variables, environment variables, and shell functions currently defined in the session using the `set` command.
+
+**Command Used:**
+
+```bash
+set
+```
+
+**Example usage**
+
+```bash
+source ./5-local_variables
+# Output: list of local variables
 ```
