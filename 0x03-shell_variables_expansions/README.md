@@ -39,3 +39,39 @@ Appends `/action` to the system `PATH` environment variable, so it becomes the l
 ```bash
 export PATH="$PATH:/action"
 ```
+
+**Example usage**
+
+```bash
+ # before
+echo $PATH
+/home/julien/bin:/home/julien/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+# after
+source ./2-path
+echo $PATH
+/home/julien/bin:/home/julien/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/action
+
+# /action should now appear at the end
+
+```
+
+## Task 3: If the path be beautiful, let us not ask where it leads
+
+**Script Name:** `3-paths`
+
+**Description:**
+Counts how many valid (non-empty) directories are in the `$PATH` variable. It handles cases where `$PATH` contains empty entries (`:::`).
+
+**Command Used:**
+
+```bash
+echo "$PATH" | tr ':' '\n' | grep -v '^$' | wc -l
+```
+
+**Example usage**
+
+```bash
+. ./3-paths
+# Output: e.g., 11
+```
