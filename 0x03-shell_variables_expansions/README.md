@@ -308,3 +308,28 @@ DECIMAL=16   → 10
 DECIMAL=1337 → 539
 DECIMAL=15   → f
 ```
+
+## Task 15: Encode and decode text using the rot13 encryption
+
+**Script Name:** `101-rot13`
+
+**Description:**
+This script encodes and decodes input text using the ROT13 cipher.
+ROT13 is a simple letter substitution cipher that replaces a letter with the letter 13 letters after it in the alphabet.
+
+**Examples:**
+
+given a file
+
+```bash
+"Everyone is a proponent of strong encryption."
+- Dorothy E. Denning
+```
+
+```bash
+./101-rot13 < quote
+# output:
+"Rirelbar vf n cebcbarag bs fgebat rapelcgvba."
+- Qbebgul R. Qraavat
+
+```
