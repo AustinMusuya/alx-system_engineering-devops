@@ -243,3 +243,38 @@ export BINARY=10100111001
 ./11-binary_to_decimal
 # Output: 1337
 ```
+
+## Task 12: Combination
+
+**Script Name:** `12-combinations`
+
+**Description:**
+Prints all lowercase two-letter combinations (aa–zz), skipping `oo`. Alphabetically ordered. One per line.
+
+**Constraints:**
+
+- Max 64 characters in script
+- Must skip `oo`
+
+```bash
+for a in {a..z};do for b in {a..z};do [ $a$b != oo ]&&echo $a$b;done;done
+```
+
+**Example usage**
+
+```bash
+./12-combinations | wc -l    # Should be 675
+./12-combinations | grep oo  # Should return nothing
+
+#Sample Output:
+
+aa
+ab
+ac
+...
+on
+op
+oq
+...
+zz
+```
