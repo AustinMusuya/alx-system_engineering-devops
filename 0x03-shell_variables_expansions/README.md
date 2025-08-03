@@ -293,3 +293,18 @@ NUM=0               → 0.00
 NUM=98              → 98.00
 NUM=3.14159265359   → 3.14
 ```
+
+## Task 14: Decimal to Hexadecimal
+
+**Script Name:** `100-decimal_to_hexadecimal`
+
+**Description:**
+Converts a number from base 10 (stored in `$DECIMAL`) to base 16 and prints the result in lowercase.
+
+**Examples:**
+
+```bash
+DECIMAL=16   → 10
+DECIMAL=1337 → 539
+DECIMAL=15   → f
+```
