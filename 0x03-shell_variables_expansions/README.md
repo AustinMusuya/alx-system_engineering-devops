@@ -136,3 +136,24 @@ source ./6-create_local_variable
 echo $BEST
 # Output: School
 ```
+
+## Task 7: Create a global variable
+
+**Script Name:** `7-create_global_variable`
+
+**Description:**
+Creates a global environment variable named `BEST` with the value `School`. This variable is exported so it is available to child processes.
+
+**Command Used:**
+
+```bash
+export BEST="School"
+```
+
+**Example usage**
+
+```bash
+source ./7-create_global_variable
+printenv BEST
+# Output: School
+```
