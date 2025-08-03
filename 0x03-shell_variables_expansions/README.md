@@ -222,3 +222,24 @@ export LOVE=3
 ./10-love_exponent_breath
 # Output: 64
 ```
+
+## Task 11: There are 10 types of people in the world...
+
+**Script Name:** `11-binary_to_decimal`
+
+**Description:**
+Converts a binary number (from the `BINARY` environment variable) to its decimal form and prints it.
+
+**Command Used:**
+
+```bash
+echo "$((2#$BINARY))"
+```
+
+**Example usage**
+
+```bash
+export BINARY=10100111001
+./11-binary_to_decimal
+# Output: 1337
+```
