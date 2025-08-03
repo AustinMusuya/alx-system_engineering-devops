@@ -115,3 +115,24 @@ set
 source ./5-local_variables
 # Output: list of local variables
 ```
+
+## Task 6: Local variable
+
+**Script Name:** `6-create_local_variable`
+
+**Description:**
+Creates a local shell variable named `BEST` and sets its value to `School`.
+
+**Command Used:**
+
+```bash
+BEST="School"
+```
+
+**Example usage**
+
+```bash
+source ./6-create_local_variable
+echo $BEST
+# Output: School
+```
