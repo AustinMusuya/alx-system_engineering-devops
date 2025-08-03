@@ -278,3 +278,18 @@ oq
 ...
 zz
 ```
+
+## Task 13: Floats
+
+**Script Name:** `13-print_float`
+
+**Description:**
+Prints the number stored in the environment variable `NUM`, formatted to **two decimal places**.
+
+**Examples:**
+
+```bash
+NUM=0               → 0.00
+NUM=98              → 98.00
+NUM=3.14159265359   → 3.14
+```
