@@ -171,8 +171,32 @@ Prints the result of adding 128 to the value stored in the `TRUEKNOWLEDGE` envir
 echo $((128 + TRUEKNOWLEDGE))
 ```
 
+**Example usage**
+
 ```bash
 export TRUEKNOWLEDGE=1209
 ./8-true_knowledge
+# Output: 1337
+```
+
+## Task 9: Divide and rule
+
+**Script Name:** `9-divide_and_rule`
+
+**Description:**
+Divides the value of the `POWER` environment variable by the value of the `DIVIDE` environment variable and prints the result.
+
+**Command Used:**
+
+```bash
+echo $((POWER / DIVIDE))
+```
+
+**Example usage**
+
+```bash
+export POWER=42784
+export DIVIDE=32
+./9-divide_and_rule
 # Output: 1337
 ```
