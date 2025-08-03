@@ -157,3 +157,22 @@ source ./7-create_global_variable
 printenv BEST
 # Output: School
 ```
+
+## Task 8: Every addition to true knowledge is an addition to human power
+
+**Script Name:** `8-true_knowledge`
+
+**Description:**
+Prints the result of adding 128 to the value stored in the `TRUEKNOWLEDGE` environment variable.
+
+**Command Used:**
+
+```bash
+echo $((128 + TRUEKNOWLEDGE))
+```
+
+```bash
+export TRUEKNOWLEDGE=1209
+./8-true_knowledge
+# Output: 1337
+```
