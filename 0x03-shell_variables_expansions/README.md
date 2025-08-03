@@ -200,3 +200,25 @@ export DIVIDE=32
 ./9-divide_and_rule
 # Output: 1337
 ```
+
+## Task 10: Love is anterior to life, posterior to death, initial of creation, and the exponent of breath
+
+**Script Name:** `10-love_exponent_breath`
+
+**Description:**
+Displays the result of raising the value of the `BREATH` environment variable to the power of `LOVE`.
+
+**Command Used:**
+
+```bash
+echo $((BREATH ** LOVE))
+```
+
+**Example usage**
+
+```bash
+export BREATH=4
+export LOVE=3
+./10-love_exponent_breath
+# Output: 64
+```
