@@ -257,7 +257,7 @@ Prints all lowercase two-letter combinations (aa–zz), skipping `oo`. Alphabeti
 - Must skip `oo`
 
 ```bash
-for a in {a..z};do for b in {a..z};do [ $a$b != oo ]&&echo $a$b;done;done
+echo {a..z}{a..z} | tr ' ' '\n' | grep -v 'oo'
 ```
 
 **Example usage**
