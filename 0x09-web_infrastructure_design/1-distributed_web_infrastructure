@@ -67,23 +67,7 @@ A user types www.foobar.com into their browser.
 
 ## 3. Whiteboard Diagram (Text Form)
 
-              User Browser
-                   |
-                   v
-           [ DNS Server ]
-        www.foobar.com -> LB_IP
-                   |
-                   v
-
-    [ Load Balancer: HAProxy ]
-    | (Round Robin) |
-    v v
-    [ Backend Server 1 ] [ Backend Server 2 ]
-    Nginx + App Server Nginx + App Server
-    | |
-    +----------[ MySQL Primary ]------+
-    |
-    [ MySQL Replica ]
+[Distributed Web Infrasturcture](https://drive.google.com/file/d/1LTnBf2caIr3ItR_eODITg_aZZQwkwSMR/view?usp=sharing)
 
 ## 4. Role of Each Component
 

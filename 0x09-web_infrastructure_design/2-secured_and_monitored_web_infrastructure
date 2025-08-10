@@ -14,32 +14,7 @@
 
 ## Whiteboard diagram (text)
 
-User Browser
-|
-v
-[ DNS -> LB IP for www.foobar.com ]
-|
-v
-[ Edge Firewall ] <-- public internet
-|
-v
-[ Load Balancer @ Server-1 (HAProxy) ]
-
-- SSL cert for www.foobar.com (TLS termination)
-- Nginx forwarding to backends (optional)
-- Monitoring client (agent)
-  |
-  v (internal network protected by Internal Firewall)
-  +------------------------------+
-  | Backend Subnet |
-  | / \ |
-  | v v |
-  | Server-2 Server-3 |
-  | Nginx+App + Nginx+App + |
-  | MySQL Primary MySQL Replica |
-  | host-fw host-fw |
-  | monitor agent monitor agent |
-  +------------------------------+
+[Secured & Monitored Web Infrastructure](https://drive.google.com/file/d/1jkmhro0ioQhJR8JNc8uLx0oBScrl8EMt/view?usp=sharing)
 
 ## The required additions and why
 

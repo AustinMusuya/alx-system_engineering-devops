@@ -40,24 +40,7 @@ We’re moving away from an “all-in-one” backend model toward a multi-tier a
 
 ## 3. Whiteboard Diagram (Text Layout)
 
-User Browser
-|
-v
-[ DNS -> Virtual IP for LB Cluster ]
-|
-+-----------------------------+
-| |
-[ HAProxy LB #1 ] [ HAProxy LB #2 ]
-(VRRP / Keepalived Cluster)
-|
-v
-[ Web Server ]
-|
-v
-[ Application Server ]
-|
-v
-[ Database Server ]
+[Scale Up](https://drive.google.com/file/d/1Yk1-2WD4PcvuhweZ2rA1Mm-R8C1nBJyS/view?usp=sharing)
 
 ## 4. Web Server vs Application Server (Important Distinction)
 

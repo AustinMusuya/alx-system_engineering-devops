@@ -74,21 +74,9 @@
 
         Uses the HTTP/HTTPS protocol over TCP/IP between the server and the user’s computer.
 
-### 3. Whiteboard Diagram (Text Form)
+### 3. Whiteboard Diagram:
 
-User Browser
-|
-v
-[ Internet ]
-|
-v
-[ DNS Server ] -- "www.foobar.com -> 8.8.8.8"
-|
-v
-[ Server @ 8.8.8.8 ]
-├── Nginx (web server)
-├── App Server (runs code)
-└── MySQL Database
+[Simple Web Stack Diagram](https://drive.google.com/file/d/1BNURTK-80n77WXad6YcDBEgoKB6Zb_JF/view?usp=sharing)
 
 ### 4. Issues with This Infrastructure
 
