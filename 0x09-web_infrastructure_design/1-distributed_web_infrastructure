@@ -1,0 +1,118 @@
+## 1. Walkthrough – User Accessing the Distributed Website
+
+**1. User action:**
+A user types www.foobar.com into their browser.
+
+**2. DNS resolution:**
+
+        www.foobar.com resolves to the public IP of the load balancer server (HAProxy).
+
+        This is done via an A record in DNS.
+
+**3. Load balancing:**
+
+        The HAProxy load balancer receives the HTTP/HTTPS request.
+
+        It forwards the request to one of the two backend servers according to the configured algorithm (for example, round robin).
+
+**4. Web and application processing:**
+
+        The selected backend server runs Nginx (web server) and the application server.
+
+        Static files are served directly by Nginx; dynamic requests go through the application code.
+
+**5. Database queries:**
+
+        The backend server queries the Primary MySQL node for writes.
+
+        Reads can be directed to the Replica MySQL node to reduce load.
+
+**6. Response to the user:**
+
+        The backend server returns the response to HAProxy.
+
+        HAProxy sends it back to the user’s browser.
+
+## 2. Components in the Infrastructure
+
+### New elements compared to the simple stack
+
+**Load Balancer (HAProxy)**
+
+            Distributes incoming requests between backend servers.
+
+            Increases fault tolerance and helps scale horizontally.
+
+            Algorithm: Round Robin — sends each request to the next server in the list, cycling evenly.
+
+            Setup type: Active-Active — both backend servers handle traffic simultaneously.
+
+                Active-Active: All nodes are active and share traffic.
+
+                Active-Passive: One node handles traffic, another is on standby until the active fails.
+
+**Second backend server**
+
+            Prevents a single server from being overloaded.
+
+            Provides redundancy — if one backend fails, traffic can still be served.
+
+**Database Primary-Replica Cluster**
+
+            Primary node (Master) handles write operations.
+
+            Replica node (Slave) asynchronously copies data from the primary and handles read queries.
+
+            This reduces load on the primary and improves read performance.
+
+## 3. Whiteboard Diagram (Text Form)
+
+              User Browser
+                   |
+                   v
+           [ DNS Server ]
+        www.foobar.com -> LB_IP
+                   |
+                   v
+
+    [ Load Balancer: HAProxy ]
+    | (Round Robin) |
+    v v
+    [ Backend Server 1 ] [ Backend Server 2 ]
+    Nginx + App Server Nginx + App Server
+    | |
+    +----------[ MySQL Primary ]------+
+    |
+    [ MySQL Replica ]
+
+## 4. Role of Each Component
+
+**HAProxy Load Balancer:** Distributes requests, prevents overload on one server, allows redundancy.
+
+**Nginx (Web Server):** Serves static files, reverse proxies dynamic requests to the application server.
+
+**Application Server:** Runs backend logic (PHP-FPM, Gunicorn, Node.js).
+
+**MySQL Primary:** Handles writes, sends replication changes to the Replica.
+
+**MySQL Replica:** Handles read queries to offload the Primary.
+
+## 5. Issues with This Infrastructure
+
+**1. Single Points of Failure (SPOF):**
+
+        The load balancer itself — if it fails, the site is down.
+
+        The MySQL Primary — if it fails, no writes can happen until promoted from a replica.
+
+**2. Security issues:**
+
+        No firewall — all ports may be exposed.
+
+        No HTTPS — data (including login credentials) is sent in plain text.
+
+**3. No monitoring:**
+
+        No visibility into server health, traffic spikes, or failures.
+
+        Failures may go undetected until users complain.

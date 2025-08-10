@@ -1,0 +1,102 @@
+### 1. User Accessing the Website
+
+    User action:
+    A user opens their browser and types www.foobar.com.
+
+    DNS resolution:
+
+        The browser checks the DNS to resolve www.foobar.com into an IP address.
+
+        In our case, the A record for www points to 8.8.8.8 (our server’s public IP).
+
+    Request to server:
+    The browser sends an HTTP request to IP 8.8.8.8 on port 80 (or HTTPS on port 443).
+
+    Web server (Nginx):
+
+        Nginx receives the request.
+
+        It decides whether to serve static files directly (HTML, CSS, images) or pass the request to the application server.
+
+    Application server:
+
+        The app server runs our application code (for example, Gunicorn for Python, PHP-FPM for PHP, or Passenger for Ruby).
+
+        If the page needs data, it queries the MySQL database.
+
+    Database (MySQL):
+
+        MySQL stores structured data (users, posts, transactions).
+
+        It returns the required data to the application server.
+
+    Response back to the user:
+
+        The application server sends the generated HTML to Nginx.
+
+        Nginx sends it over the internet to the user’s browser via HTTP(S).
+
+        The browser renders the page.
+
+### 2. Components in the Infrastructure
+
+    Server:
+    A physical or virtual machine with CPU, RAM, storage, and an OS that runs all the software in our stack.
+
+    Domain Name (foobar.com):
+    A human-readable alias that points to our server’s IP so users don’t have to remember numbers.
+
+    DNS record for www:
+
+        Type: A record (maps www.foobar.com to the server’s IPv4 address).
+
+        Example: www.foobar.com → 8.8.8.8.
+
+    Web server (Nginx):
+
+        Handles HTTP/S requests.
+
+        Serves static files.
+
+        Acts as a reverse proxy to the application server.
+
+    Application server:
+
+        Runs the backend application code.
+
+        Processes requests, applies business logic, queries the database, and generates responses.
+
+    Database (MySQL):
+
+        Stores and retrieves persistent data in a structured format (tables, rows, columns).
+
+    Communication:
+
+        Uses the HTTP/HTTPS protocol over TCP/IP between the server and the user’s computer.
+
+### 3. Whiteboard Diagram (Text Form)
+
+User Browser
+|
+v
+[ Internet ]
+|
+v
+[ DNS Server ] -- "www.foobar.com -> 8.8.8.8"
+|
+v
+[ Server @ 8.8.8.8 ]
+├── Nginx (web server)
+├── App Server (runs code)
+└── MySQL Database
+
+### 4. Issues with This Infrastructure
+
+    Single Point of Failure (SPOF):
+    If the one server goes down, the entire site becomes unreachable.
+
+    Downtime during maintenance:
+    Deploying new code, updating Nginx, or restarting MySQL will interrupt service.
+
+    Scalability limits:
+    Cannot handle large traffic spikes. Adding more users will eventually overwhelm CPU, RAM, and bandwidth.

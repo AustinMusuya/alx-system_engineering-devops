@@ -1,0 +1,211 @@
+## Top-level flow (user perspective)
+
+**1. User types https://www.foobar.com into their browser.**
+
+**2. DNS resolves www.foobar.com to the public IP of the load balancer.**
+
+**3. Connection uses TLS to the load balancer.**
+
+**4. Load balancer forwards the request to a backend server over an internal network.**
+
+**5 Backend server (Nginx + app) serves content, queries MySQL if needed.**
+
+**6. Monitoring agents on every server collect logs and metrics and ship them to the monitoring backend.**
+
+## Whiteboard diagram (text)
+
+User Browser
+|
+v
+[ DNS -> LB IP for www.foobar.com ]
+|
+v
+[ Edge Firewall ] <-- public internet
+|
+v
+[ Load Balancer @ Server-1 (HAProxy) ]
+
+- SSL cert for www.foobar.com (TLS termination)
+- Nginx forwarding to backends (optional)
+- Monitoring client (agent)
+  |
+  v (internal network protected by Internal Firewall)
+  +------------------------------+
+  | Backend Subnet |
+  | / \ |
+  | v v |
+  | Server-2 Server-3 |
+  | Nginx+App + Nginx+App + |
+  | MySQL Primary MySQL Replica |
+  | host-fw host-fw |
+  | monitor agent monitor agent |
+  +------------------------------+
+
+## The required additions and why
+
+**1. Three firewalls**
+
+        Edge Firewall. Sits at the network edge to block unwanted traffic, only allow ports 80/443 to the LB, and limit admin access to known IPs.
+
+        Internal Firewall. Controls traffic between load balancer and backend subnet, and between app tier and DB. Enforces least privilege between tiers.
+
+        Host-based Firewall. On the database host or all hosts to control local inbound/outbound connections and add defense in depth.
+        Why three. Each layer reduces attack surface. Perimeter stops the noisy attacks. Internal firewall limits lateral movement. Host firewall protects the host if network controls fail.
+
+**2. SSL certificate for www.foobar.com**
+
+        Required to serve traffic over HTTPS. Use a trusted certificate from a CA or Let’s Encrypt for automation.
+
+        Installed and configured so users get encrypted connections and browsers show secure padlock.
+
+**3. Three monitoring clients**
+
+        One agent installed on each server. Agents collect metrics, logs, process stats, and optional traces and ship to SumoLogic, Datadog, Prometheus pushgateway, or another APM.
+
+        Why one per server. Gives per-host visibility for CPU, memory, disk, network, process status, and local logs.
+
+## What each added element does in practice
+
+    Firewalls prevent unauthorized access and limit exposure. They enforce policies like "only LB accepts public traffic" and "only app servers talk to the DB port".
+
+    HTTPS prevents eavesdropping and tampering between users and your public entry point. It also protects credentials and session cookies.
+
+    Monitoring is for uptime, performance, security detections, and alerting so you can react before users complain.
+
+    Monitoring clients collect metrics and logs locally and ship them securely to the monitoring backend over TLS. They can also forward logs to SIEM for analysis.
+
+## How the monitoring tool collects data
+
+**Agent collects:**
+
+        Metrics: CPU, memory, disk, network, process counts, open sockets.
+
+        App metrics: Nginx + application metrics exported via an exporter or metrics endpoint.
+
+        Logs: tail of Nginx access and error logs, application logs, database logs.
+
+        Traces: optional APM instrumentation for latency breakdowns.
+
+**Transport: agent batches and sends data over HTTPS/TLS to the monitoring provider API or ingesters. Agents can push or the monitoring system can pull depending on architecture.**
+
+## How to monitor web server QPS (requests per second)
+
+### Practical options, pick one or combine:
+
+**1. Nginx access logs**
+
+        Count entries in the access log per interval. Use Fluentd/Fluent Bit or Filebeat to parse and ship request counts. Build time series with sum over 1 minute.
+
+**2. Nginx metrics exporter**
+
+        Enable stub_status or nginx-vts, run a Prometheus exporter to expose nginx_http_requests_total and use Prometheus to compute rate(nginx_http_requests_total[1m]) to get QPS.
+
+**3. Application metrics**
+
+        Instrument the app to increment a counter per request and expose via a /metrics endpoint. Prometheus or your monitoring backend scrapes it and you compute rate.
+
+**4. Dashboard and alerts**
+
+        Create a dashboard showing QPS, 95th latency, error rate. Add alert rules, for example QPS>threshold + error_rate>1% triggers paging.
+
+## Configuration detail: Load balancer distribution algorithm
+
+**Use Round Robin or Least Connections depending on behavior desired.**
+
+        Round Robin. Requests are sent in turn to each backend server. Good when nodes are similar and load is even.
+
+        Least Connections. Send new requests to the backend with the fewest active connections. Better if sessions vary widely in duration.
+
+**For production use, prefer health checks integrated with HAProxy and use dynamic weights or least-connections if backends differ.**
+
+## Active-Active vs Active-Passive for the LB and backends
+
+**Active-Active**
+
+        Multiple nodes serve traffic simultaneously. Traffic is balanced between them. Better utilization and capacity.
+
+**Active-Passive**
+
+        One node handles traffic, the other waits as a standby. Failover activates the passive node only if the active fails.
+
+**In this design, backends are Active-Active. For the load balancer itself you need HA (two LBs) to avoid LB SPOF. Single LB is a SPOF.**
+
+## How a Primary-Replica MySQL cluster works
+
+**Primary node**
+
+        Accepts write operations from the application.
+
+        Writes are recorded in binary logs which describe data changes.
+
+**Replica node**
+
+        Connects to the primary, reads binary logs, and replays them to keep a copy of the data.
+
+        Typically serves read queries to offload reads from the primary.
+
+**Replication modes**
+
+        Asynchronous: Replica lags are possible but performance better.
+
+        Semi-synchronous or synchronous variants reduce data loss risk at the cost of latency.
+
+## Difference between Primary and Replica from the app perspective
+
+**Primary**
+
+        Accepts writes and reads. Required for state changes.
+
+**Replica**
+
+        Typically read-only from the app. Not authoritative for writes.
+
+        May be stale by a small window due to replication lag. Do not read-after-write from a replica unless you handle consistency.
+
+## Issues with this infrastructure
+
+**Terminating SSL at the load balancer level is an issue**
+
+        If TLS terminates at LB and traffic from LB to backend is plaintext, internal traffic is exposed to anyone who can sniff inside the network. This is a problem in environments where internal networks are not fully trusted.
+
+        Mitigation: Re-encrypt backend connections with TLS, use mTLS between LB and backends, or run TLS end-to-end. Use private networks and strong host/firewall rules.
+
+**Having only one MySQL server capable of accepting writes is an issue**
+
+        Single write master is a write SPOF. If primary fails you cannot commit writes until you failover or promote a replica.
+
+        Replication lag complicates automatic promotion. Mitigation: use automated failover tooling such as MHA, Orchestrator, or switch to a multi-primary solution like Galera or MySQL Group Replication if your application can handle it.
+
+**Having servers with all the same components on each host is a problem**
+
+        Mixing responsibilities increases blast radius. If every server runs web, app, and DB, a compromise or resource exhaustion in one area affects everything.
+
+        Harder to scale because you must scale all components together even if only DB needs more resources.
+
+        Harder to secure and to tune; separation of concerns is best practice. Use dedicated DB servers, app servers, and LB nodes in larger setups.
+
+## SPOFs you must call out
+
+    Single load balancer. If it fails the whole site is down. Solution: run a pair of LBs with floating IP or DNS-based failover.
+
+    Single MySQL primary for writes. Solution: automated failover and/or multi-primary cluster.
+
+    Single monitoring pipeline ingest. If monitoring backend goes down you lose telemetry and alerting; use HA or local buffering in agents.
+
+## Quick practical recommendations
+
+    Re-encrypt backend connections or enable mTLS between LB and backends.
+
+    Add a second load balancer and use VRRP (Keepalived) for high availability.
+
+    Implement automated DB failover and test it regularly.
+
+    Keep separate tiers on separate hosts as you grow.
+
+    Use agents that buffer locally if network to the monitoring backend is transient.
+
+    Harden and limit admin access with firewall rules and use non-password authentication for SSH.
+
+## Short summary
+
+**Three servers:** one HAProxy load balancer and two backend servers running Nginx, the application, and a Primary and Replica MySQL pair. **Add three firewalls:** perimeter, internal, and host-based for defense in depth. Install an SSL certificate at the LB to serve HTTPS and deploy a monitoring agent on each host to ship metrics and logs to SumoLogic or Prometheus. Monitor QPS via Nginx metrics or access log counters and set alerts. **Watch out for SPOFs:** single LB and single write primary, plaintext internal traffic if you only terminate TLS at the LB, and mixed-role hosts which increase blast radius. Mitigate with LB HA, DB failover, TLS re-encryption, and tier separation.

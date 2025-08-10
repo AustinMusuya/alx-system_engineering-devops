@@ -1,0 +1,78 @@
+## 1. Goal of This Upgrade
+
+We’re moving away from an “all-in-one” backend model toward a multi-tier architecture where the web server, application server, and database each live on their own server. We also introduce two HAProxy load balancers in a cluster for high availability.
+
+## 2. New Components and Why They’re Added
+
+#### 1. Additional Load Balancer (HAProxy)
+
+    Why: The single load balancer from the previous setup was a Single Point of Failure (SPOF). If it went down, the entire site became inaccessible.
+
+    Cluster Setup: Two HAProxy servers are configured with VRRP (via Keepalived) or floating IP so if one fails, the other automatically takes over.
+
+    Result: High availability at the entry point to the infrastructure.
+
+#### 2. Separate Web Server
+
+    Why: Offload static file serving (HTML, CSS, JS, images) from the application server. This improves performance and reduces load on the backend application logic.
+
+    Example: Nginx runs here purely to serve static content and proxy dynamic requests to the application server.
+
+    Benefit: Better tuning for static file delivery, caching, and reduced latency.
+
+#### 3. Separate Application Server
+
+    Why: Runs the dynamic code (Python, PHP, Ruby, Node.js). Separating it from the web server allows scaling each independently.
+
+    Benefit: If application logic is heavy, you can scale application servers without affecting web or database layers.
+
+#### 4. Separate Database Server
+
+    Why: Databases are resource-hungry (I/O and memory). Hosting them on a dedicated server improves stability and security.
+
+    Benefit: Database tuning, backups, and replication can be done independently of web/app scaling.
+
+#### 5. Extra Backend Server
+
+    Why: With component separation, we can add dedicated application servers without touching the DB or web layer.
+
+    Benefit: Handles more concurrent requests without database or static file bottlenecks.
+
+## 3. Whiteboard Diagram (Text Layout)
+
+User Browser
+|
+v
+[ DNS -> Virtual IP for LB Cluster ]
+|
++-----------------------------+
+| |
+[ HAProxy LB #1 ] [ HAProxy LB #2 ]
+(VRRP / Keepalived Cluster)
+|
+v
+[ Web Server ]
+|
+v
+[ Application Server ]
+|
+v
+[ Database Server ]
+
+## 4. Web Server vs Application Server (Important Distinction)
+
+Aspect Web Server (e.g., Nginx, Apache) Application Server (e.g., Gunicorn, PHP-FPM, Node.js)
+Purpose Handles HTTP requests, serves static files, proxies dynamic requests. Runs the application code that processes business logic.
+Handles Static content delivery, SSL termination, caching. Dynamic requests requiring DB queries, computations, and state changes.
+Performance Optimized for concurrency, caching, and compression. Optimized for executing application logic and generating responses.
+Scaling Scales horizontally for static content delivery. Scales horizontally for CPU/logic-intensive processing.
+
+## 5. Why This Scaling Model Works
+
+    Resilience: No single LB failure brings down the site.
+
+    Performance: Static and dynamic workloads are separated, so tuning is easier.
+
+    Scalability: Each layer can be scaled independently (more web servers for static load, more app servers for business logic, more DB replicas for read load).
+
+    Security: DB is isolated from the public internet and only accepts traffic from the app layer.
